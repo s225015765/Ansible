@@ -1,0 +1,33 @@
+---
+- hosts: webservers
+  become: yes
+  tasks: 
+    - name: Add lines to the Dockerfile
+      lineinfile:
+        path: "/home/devasc/Documents/CaseStudy/ansible-project/Dockerfile"
+        line: |
+          FROM httpd:alpine
+          COPY ./hello_world_website/index.html /usr/local/apache2/htdocs/
+          EXPOSE 80
+          CMD ["httpd-foreground"]
+
+    - name: Build Dockerfile
+      command: docker build -t website /home/devasc/Documents/CaseStudy/ansible-project
+
+    - name: Run Dockerfile
+      command: docker run -t -d -p 8082:80 --name hello website
+
+    - name: Update Operating System
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Install necessary dependancies
+      apt:
+        name:
+          - python3
+          - python3-pip
+          - docker.io
+        state: present        
+
+
